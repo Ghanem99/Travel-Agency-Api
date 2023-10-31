@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\TravelController;
 use App\Http\Controllers\Api\V1\TourController;
 
 use App\Http\Controllers\Api\V1\Admin\TravelController as AdminTravelController;
+use App\Http\Controllers\Api\V1\Auth\LoginController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +27,8 @@ use App\Http\Controllers\Api\V1\Admin\TravelController as AdminTravelController;
 Route::get('travels', [TravelController::class, 'index']);
 Route::get('travels/{travel:slug}/tour', [TourController::class, 'index']);
 
-Route::prefix('admin')->group(function() {
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function() {
     Route::post('travels', [AdminTravelController::class, 'store']);
 });
+
+Route::post('login', [LoginController::class, '__invoke']);
