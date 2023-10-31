@@ -7,6 +7,7 @@ use App\Models\User;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 
 class CreateUserCommand extends Command
@@ -32,7 +33,7 @@ class CreateUserCommand extends Command
     {
         $user['name'] = $this->ask('What is your name?');
         $user['email'] = $this->ask('What is your email?');
-        $user['password'] = HASH::make($this->secret('What is the password?'));
+        $user['password'] = $this->secret('What is the password?');
         $roleName = $this->choice('What is your role?', ['admin', 'editor'], 1);
         $role = \App\Models\Role::where('name', $roleName)->first();
         if(! $role) {
@@ -40,7 +41,21 @@ class CreateUserCommand extends Command
             return -1;
         }
 
+        $validator = \Validator::make($user, [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required'
+        ]);
+
+        if($validator->fails()) {
+            foreach($validator->errors()->all() as $error) {
+                $this->error($error);
+            }
+            return -1;
+        }
+
         DB::transaction(function() use ($user, $role) {
+            $user['password'] = Hash::make($user['password']);
             $user = User::create($user);
             $user->roles()->attach($role->id);
         });
