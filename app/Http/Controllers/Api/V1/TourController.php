@@ -3,30 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-use App\Models\Travel;
+use App\Http\Requests\ToursListRequest;
 use App\Http\Resources\TourResource;
-
-use Illuminate\Validation\Rule;
-
+use App\Models\Travel;
 
 class TourController extends Controller
 {
-    public function index(Travel $travel, Request $request)
+    public function index(Travel $travel, ToursListRequest $request)
     {
-        $request->validate([
-            'priceFrom' => 'nullable|numeric|min:0',
-            'priceTo' => 'nullable|numeric|min:0',
-            'dateFrom' => 'nullable|date',
-            'dateTo' => 'nullable|date',
-            'sortOrder' => Rule::in(['asc', 'desc']),
-            'sortBy' => Rule::in(['price']),
-        ], [
-            'sortBy' => 'The sort field must be one of the following types: price',
-            'sortOrder' => 'The sort order must be one of the following types: asc, desc'
-        ]);
-
         $tours = $travel->tours()
             ->when($request->priceFrom, function ($query) use ($request) {
                 $query->where('price', '>=', $request->priceFrom);
