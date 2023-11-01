@@ -28,9 +28,14 @@ use App\Http\Controllers\Api\V1\Auth\LoginController;
 Route::get('travels', [TravelController::class, 'index']);
 Route::get('travels/{travel:slug}/tour', [TourController::class, 'index']);
 
-Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function() {
-    Route::post('travels', [AdminTravelController::class, 'store']);
-    Route::post('admin/travels/{travel}/tours', [AdminTourController::class, 'store']);
+Route::prefix('admin')->middleware(['auth:sanctum'])->group(function() {
+    Route::middleware(['role:admin'])->group(function() {
+        Route::post('travels', [AdminTravelController::class, 'store']);
+        Route::post('travels/{travel}/tours', [AdminTourController::class, 'store']);
+    });
+    Route::middleware(['role:editor'])->group(function() {
+        Route::post('travels/{travel}', [AdminTravelController::class, 'update']);
+    });
 });
 
 Route::post('login', [LoginController::class, '__invoke']);
