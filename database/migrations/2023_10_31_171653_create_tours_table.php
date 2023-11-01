@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('travel_id')->constrained('travels');
             $table->string('name');
+            $table->decimal('price', 8, 2);
             $table->date('starting_date');
             $table->date('ending_date');
             $table->timestamps();
